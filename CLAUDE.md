@@ -187,19 +187,56 @@ LinkedIn/GitHub links. Expected to be redesigned (see §10).
 
 ## 9. Content and data
 
-- `projects.js` was generated from the V1 site (`Mathijs-04/Portfolio`, `src/pages/Projects.jsx`
-  and `src/pages/projects/*.jsx`). Names, subtitles (`tagline`) and order are the official V1 ones.
-  **Rarities are a first pass by the agent**; the user may change them. Legendary currently:
-  Warhammer Rule Assistant, The Arcane Archive, Echoes of the Realm, SignTrail.
+- **Projects page, cards and project data are synced from the definitive version**
+  (`~/Code/Fantasy-Portfolio`, `Mathijs-04/Portfolio-V3`, commit `647f8fc`): `src/data/projects.js`
+  (28 projects, the user's rarities, `cover` thumbnails), `public/projects/`, and the components
+  `ProjectCard, CardFace, CardBack, CardGallery, CardInspector, Gem, TechIcon, SortSelect, Button,
+  useTilt` plus `card.css`, `projects.css`, `button.css`, `public/fx/Grime.webp`. Keep these files
+  identical to the official ones (re-copy them when the official version changes); put
+  prototype-only behaviour in separate files. react-icons is pinned to 5.5.0 like the official
+  lockfile (5.7.0 dropped `SiCss3`).
 - `skills.js`: `level` (1–3 star brightness) and every `blurb` are **placeholders written by the
-  agent** — the user should rewrite them. Figma/Postman have no linked projects.
+  agent**. Its "Seen in" matching still uses the old prototype tech names (e.g. "SQL"), so some
+  links no longer match the official data.
+
+### Booster packs (prototype feature, 2026-11-12)
+
+The Projects page starts empty: the visitor opens booster packs to collect the project cards.
+- `src/data/collection.js` — the collection in `localStorage` (`projects:collection:v1`, an array
+  of slugs). `drawPack` takes up to `PACK_SIZE` (8) random projects not yet owned, so no doubles:
+  28 projects = packs of 8, 8, 8, 4. The pack is saved the moment it is opened.
+- `pages/Projects.jsx` — the official page plus: only owned cards in the deck (sort still works),
+  `BoosterPack` above the deck (alone and centred on a first visit), new cards rendered hidden in
+  their slots until their flight lands, the deal-in re-observes added cards, textures pre-decoded
+  on mount, and a "Reset collection (dev)" link (dev builds only).
+- `components/BoosterPack.jsx` — `PackArt` (crimped foil strips, a plain obsidian body with a gold
+  double rule, ornaments, "Projects" and the card count; sized in cqw) and the page stack (up to
+  3 packs underneath, tilt, gentle bob and glow). The pack itself is the button (the user removed
+  the separate "Open pack" button and asked for a plain pack, no moon art).
+- `components/CardCover.jsx` — the plain face-down side shared by all cards (dark stone, bone
+  rule, ornaments). Not the same as `CardBack` (the detail side in the inspector).
+- `components/PackOpening.jsx` — the overlay: rise (pack flies from the page to the centre) →
+  tear (shake; the top strip is ripped off: it peels up from the left while hinged at its right
+  end, snaps free and flutters away; both torn edges turn ragged with a pale fibrous band, the
+  pack's mouth darkens and foil flecks pop off left to right — all in `PackArt`/`packs.css`;
+  light in the best card's rarity colour) → spill (wrapper drops,
+  cards spring out face down into a spread: 4 across, 3 on tall screens) → reveal (click to turn;
+  face-down rare+ cards glow a hint of their colour; a rare gets a small shimmer when turned: one
+  faint ring and a few sparks) → "Add to collection" flies each card into its slot. Esc collects
+  early.
+  Epic and legendary pulls are deliberately big (the user asked for "more extreme"): the card
+  first charges up (trembles, glow swells; 0.45s / 0.8s), then turns with a bigger pop and burst,
+  shockwave ring(s), sparks in the rarity colour, a full-screen colour flash and a shake of the
+  spread (Web Animations on `translate`); legendaries keep slowly turning rays behind them.
+- `styles/packs.css` — all of the above. Measured: flips, spill and collect at ~16.7 ms/frame;
+  the very first opening/collect can drop a frame or two while textures decode.
+- Possible next steps (not built): pack odds/guarantees, a counter of cards owned, a way to see
+  which cards are still missing, porting it to the definitive version.
 
 ## 10. Plans, ideas and open items
 
 Agreed / parked ideas:
-- **Card packs (parked, user likes it):** on the Projects page, a sealed pack (wax seal, ornaments)
-  that tears open and fans out cards drawn with real rarity odds — a way to "unlock" projects.
-  Build only when the user asks.
+- **Card packs:** prototyped (see "Booster packs" above); to be built in the definitive version.
 - **About page redesign:** the user liked the idea of a **map** or a **study** (a candlelit desk with
   objects representing school, work and hobbies) that shows general things like school and work,
   but the scroll-map prototype felt too AI-generated. Keep it brief and hand-made in feel.

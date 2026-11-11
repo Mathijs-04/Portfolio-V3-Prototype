@@ -1,10 +1,36 @@
-import { useState } from "react";
+import { SiGithub } from "react-icons/si";
+import { TbExternalLink } from "react-icons/tb";
 import { Ornaments, RARITY_LABEL } from "./CardFace.jsx";
+import CardGallery from "./CardGallery.jsx";
+import TechIcon from "./TechIcon.jsx";
 
-/** The reverse of a card: the project's write-up, gallery, tech and links. */
+const LINK_ICON = { code: SiGithub, live: TbExternalLink };
+const CORNERS = ["tl", "tr", "bl", "br"];
+
+/**
+ * A link on the card back: a hand-cut plate ruled like the card's own frame, with small
+ * corner brackets and a little grime.
+ */
+function CardLink({ href, kind, children }) {
+    const Icon = LINK_ICON[kind] ?? TbExternalLink;
+    return (
+        <a className={`back__link back__link--${kind}`} href={href} target="_blank" rel="noreferrer">
+            <span className="back__link-grime" aria-hidden="true" />
+            {CORNERS.map((c) => (
+                <span key={c} className={`back__link-corner back__link-corner--${c}`} aria-hidden="true" />
+            ))}
+            <Icon aria-hidden="true" focusable="false" />
+            {children}
+        </a>
+    );
+}
+
+/**
+ * The reverse of a card (ported from the prototype): the project's long description,
+ * a gallery, the full tech list and links. Scrolls inside the card when it runs long.
+ */
 function CardBack({ project }) {
     const { name, rarity, tagline, tech, images, lore, links } = project;
-    const [active, setActive] = useState(0);
 
     return (
         <div className="face face--back" data-rarity={rarity}>
@@ -18,26 +44,7 @@ function CardBack({ project }) {
                 </h2>
                 <p className="back__tagline">{tagline}</p>
 
-                <figure className="back__art">
-                    <img src={`/${images[active]}`} alt={`${name}, image ${active + 1} of ${images.length}`} />
-                </figure>
-
-                {images.length > 1 && (
-                    <div className="back__thumbs" role="group" aria-label="Gallery">
-                        {images.map((src, i) => (
-                            <button
-                                key={src}
-                                type="button"
-                                className={`back__thumb${i === active ? " is-active" : ""}`}
-                                onClick={() => setActive(i)}
-                                aria-label={`Show image ${i + 1}`}
-                                aria-pressed={i === active}
-                            >
-                                <img src={`/${src}`} alt="" loading="lazy" />
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <CardGallery name={name} images={images} />
 
                 <div className="back__lore">
                     {lore.map((p) => (
@@ -47,16 +54,19 @@ function CardBack({ project }) {
 
                 <ul className="back__tech" aria-label="Built with">
                     {tech.map((t) => (
-                        <li key={t}>{t}</li>
+                        <li key={t}>
+                            <TechIcon name={t} />
+                            {t}
+                        </li>
                     ))}
                 </ul>
 
                 {links.length > 0 && (
                     <div className="back__links">
                         {links.map(({ label, href, kind }) => (
-                            <a key={href} className={`back__link back__link--${kind}`} href={href} target="_blank" rel="noreferrer">
+                            <CardLink key={label} href={href} kind={kind}>
                                 {label}
-                            </a>
+                            </CardLink>
                         ))}
                     </div>
                 )}

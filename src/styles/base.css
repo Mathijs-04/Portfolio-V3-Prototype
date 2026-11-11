@@ -54,6 +54,8 @@
 
 html {
     background: var(--night);
+    /* Keep the scrollbar's space when an overlay locks scrolling, so the page doesn't shift. */
+    scrollbar-gutter: stable;
     scrollbar-color: #3a3835 var(--night);
 }
 

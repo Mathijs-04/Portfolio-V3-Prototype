@@ -1,16 +1,10 @@
-/* ==========================================================================
-   Projects: a title and the deck.
-   ========================================================================== */
-
-.projects {
-    padding-bottom: 14vh;
-}
+/* Projects page. For now: a row of sample cards, one per rarity. */
 
 .deck {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
-    gap: clamp(28px, 3.2vw, 48px) clamp(20px, 2.6vw, 40px);
-    margin: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(20px, 2.6vw, 40px);
+    margin: 0 0 clamp(48px, 8vh, 96px);
     padding: 0;
     list-style: none;
 }
@@ -19,33 +13,42 @@
     width: 100%;
     max-width: 300px;
     justify-self: center;
+    /* Deal-in (see useDealIn): uses the individual translate/rotate properties, so it never
+       fights the transform that framer sets when the deck is re-sorted. */
     opacity: 0;
-    transform: translate3d(0, 44px, 0);
+    translate: 0 36px;
+    rotate: -2.5deg;
     transition:
-        opacity 0.6s ease,
-        transform 0.9s var(--ease-out);
+        opacity 0.5s ease-out,
+        translate 0.75s var(--ease-out),
+        rotate 0.75s var(--ease-out);
 }
 
 .deck__slot.is-dealt {
     opacity: 1;
-    transform: none;
-}
-
-@media (max-width: 520px) {
-    .deck {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 22px 14px;
-    }
+    translate: 0 0;
+    rotate: 0deg;
 }
 
 @media (prefers-reduced-motion: reduce) {
     .deck__slot {
+        opacity: 1;
+        translate: none;
+        rotate: none;
         transition: none;
     }
 }
 
+/* Tablets: 2x2. Phones: still two-up (the face hides its small print below 200px). */
+@media (max-width: 900px) {
+    .deck {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px 18px;
+    }
+}
+
 /* ==========================================================================
-   Inspector: the card flies out of the deck and turns over.
+   Inspector: the card flies out of the deck and turns over (from the prototype).
    ========================================================================== */
 
 .inspector {
@@ -115,13 +118,14 @@
     width: 16cqw;
 }
 
+/* The write-up scrolls inside the frame when it runs long. */
 .back {
     position: absolute !important;
     inset: 9cqw 7.5cqw 7.5cqw;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 1cqw 2.5cqw 4cqw;
-    font-size: clamp(14px, 3.1cqw, 18px);
+    font-size: clamp(15px, 3.4cqw, 19px);
     line-height: 1.5;
     scrollbar-width: thin;
     scrollbar-color: var(--ink-faint) transparent;
@@ -129,13 +133,16 @@
 
 .back__rarity {
     margin: 0;
-    font-size: 0.78em;
+    font-size: 0.8em;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.12em;
     text-align: center;
     text-transform: uppercase;
-    color: var(--ink-soft);
+    color: color-mix(in srgb, var(--r) 28%, var(--ink));
 }
+
+.face[data-rarity="common"] .back__rarity { color: var(--ink-soft); }
+.face[data-rarity="legendary"] .back__rarity { color: var(--legendary); }
 
 .back__name {
     margin: 0.15em 0 0.1em;
@@ -148,14 +155,15 @@
 
 .back__tagline {
     margin: 0 0 1em;
-    font-style: italic;
+    font-weight: 500;
     text-align: center;
     color: var(--ink-soft);
 }
 
 .back__art {
+    position: relative;
     margin: 0;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 10;
     border: 0.8cqw solid var(--ink);
     outline: 0.3cqw solid var(--ink-faint);
     outline-offset: 0.7cqw;
@@ -163,18 +171,43 @@
     overflow: hidden;
 }
 
+/* Slides are stacked so the old and new image can pass each other. */
 .back__art img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    cursor: grab;
+    touch-action: pan-y; /* vertical swipes still scroll the write-up */
+    user-select: none;
 }
 
+.back__art img:active {
+    cursor: grabbing;
+}
+
+.gallery__count {
+    position: absolute;
+    right: 0.5em;
+    bottom: 0.4em;
+    z-index: 1;
+    margin: 0;
+    padding: 0 0.45em;
+    background: rgba(13, 12, 11, 0.62);
+    color: var(--bone);
+    font-size: 0.75em;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+/* Wraps onto more rows for long galleries, so every thumbnail stays reachable. */
 .back__thumbs {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.5em;
     margin-top: 0.9em;
-    overflow-x: auto;
-    scrollbar-width: none;
 }
 
 .back__thumb {
@@ -226,42 +259,250 @@
     color: #e9dcc0;
 }
 
+/* Full tech list: the same stamped icons as the front, with their names. */
 .back__tech {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4em;
+    gap: 0.45em;
     margin: 1.2em 0 0;
     padding: 0;
     list-style: none;
 }
 
 .back__tech li {
-    padding: 0.05em 0.6em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.15em 0.6em;
     border: 1.5px solid var(--ink-faint);
     font-size: 0.85em;
     font-weight: 500;
 }
 
+.back__tech svg {
+    flex: none;
+    width: 1.05em;
+    height: 1.05em;
+}
+
 .back__links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6em;
-    margin-top: 1.4em;
+    gap: 0.8em;
+    margin-top: 1.6em;
 }
 
+/* Card links: a hand-cut plate with a double rule like the card's frame, in the rarity's
+   frame colour, small corner brackets (the card ornament) and a little grime. Hover presses the frame colour in, like a stamp. */
 .back__link {
-    padding: 0.4em 1em;
+    --link-ink: var(--frame);
+
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    min-width: 7.5em;
+    padding: 0.7em 1.6em;
+    border: 4px double var(--link-ink);
+    background: color-mix(in srgb, var(--frame) 9%, transparent);
+    color: var(--ink);
+    font-size: 1.05em;
     font-weight: 600;
+    line-height: 1.2;
     text-decoration: none;
-    border: 2px solid var(--ink);
-    transition: box-shadow 0.2s;
+    clip-path: var(--rough-edge);
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
 }
 
-.back__link--live {
+.back__link svg {
+    flex: none;
+    width: 1.1em;
+    height: 1.1em;
+}
+
+.back__link-corner {
+    position: absolute;
+    width: 1.15em;
+    aspect-ratio: 1;
+    background: var(--link-ink);
+    -webkit-mask: url("/fx/corner-ornament.svg") center / contain no-repeat;
+    mask: url("/fx/corner-ornament.svg") center / contain no-repeat;
+    pointer-events: none;
+    transition: background-color 0.25s ease;
+}
+
+.back__link-corner--bl { left: 2px;  bottom: 2px; }
+.back__link-corner--br { right: 2px; bottom: 2px; transform: scaleX(-1); }
+.back__link-corner--tl { left: 2px;  top: 2px;    transform: scaleY(-1); }
+.back__link-corner--tr { right: 2px; top: 2px;    transform: rotate(180deg); }
+
+.back__link-grime {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: var(--ink);
-    color: var(--face-bg);
+    opacity: 0.16;
+    -webkit-mask: url("/fx/Grime.webp") 60% 40% / 260% auto;
+    mask: url("/fx/Grime.webp") 60% 40% / 260% auto;
+    pointer-events: none;
 }
 
-.back__link:hover {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 25%, transparent);
+.back__link--live .back__link-grime {
+    -webkit-mask-position: 15% 75%;
+    mask-position: 15% 75%;
+}
+
+/* On the filled plate the ornaments and text switch to the stone colour. Focus looks the
+   same as hover (an outline would be cut off by the hand-cut edge). */
+.back__link:hover,
+.back__link:focus-visible {
+    --link-ink: var(--face-bg);
+    background: var(--frame);
+    color: var(--face-bg);
+    outline: none;
+}
+
+.back__link:active {
+    translate: 0 1px;
+}
+
+/* ---------- Header + sort dropdown ---------- */
+
+.projects__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin: clamp(28px, 6vh, 64px) 0 clamp(24px, 4vh, 40px);
+}
+
+.projects__header .page-title {
+    margin: 0;
+}
+
+/* A dark plaque with a thin double rule, like the site button but quieter. */
+.sort {
+    position: relative;
+    z-index: 5;
+    font-size: 1rem;
+}
+
+.sort__button,
+.sort__list {
+    background: rgba(18, 17, 15, 0.82);
+    border: 1px solid rgba(233, 230, 223, 0.28);
+    box-shadow:
+        inset 0 0 0 3px rgba(18, 17, 15, 0.82),
+        inset 0 0 0 4px rgba(233, 230, 223, 0.1);
+}
+
+.sort__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    min-height: 2.6em;
+    padding: 0.35em 0.9em 0.35em 0.8em;
+    color: var(--mist);
+    cursor: pointer;
+    transition:
+        color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.sort__button:hover,
+.sort.is-open .sort__button {
+    color: var(--bone);
+    border-color: rgba(233, 230, 223, 0.5);
+}
+
+.sort__icon,
+.sort__chevron {
+    flex: none;
+    width: 1.1em;
+    height: 1.1em;
+}
+
+.sort__chevron {
+    transition: transform 0.25s var(--ease-out);
+}
+
+.sort.is-open .sort__chevron {
+    transform: rotate(180deg);
+}
+
+.sort__value {
+    color: var(--bone);
+    font-weight: 600;
+}
+
+.sort__list {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 100%;
+    margin: 0;
+    padding: 0.4em;
+    list-style: none;
+    white-space: nowrap;
+    outline: none;
+    /* Solid, so the cards underneath don't show through the options. */
+    background: #12110f;
+    box-shadow:
+        inset 0 0 0 3px #12110f,
+        inset 0 0 0 4px rgba(233, 230, 223, 0.1),
+        0 14px 30px rgba(0, 0, 0, 0.6);
+    animation: sort-open 0.18s var(--ease-out);
+}
+
+@keyframes sort-open {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}
+
+.sort__option {
+    position: relative;
+    padding: 0.4em 0.8em 0.4em 1.6em;
+    color: var(--mist);
+    cursor: pointer;
+}
+
+.sort__option.is-active {
+    color: var(--bone);
+    background: rgba(233, 230, 223, 0.07);
+}
+
+/* The chosen option is marked with a small diamond. */
+.sort__option[aria-selected="true"] {
+    color: var(--bone);
+}
+
+.sort__option[aria-selected="true"]::before {
+    content: "";
+    position: absolute;
+    left: 0.65em;
+    top: 50%;
+    width: 0.38em;
+    aspect-ratio: 1;
+    background: currentColor;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sort__list {
+        animation: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .sort__label {
+        display: none;
+    }
 }

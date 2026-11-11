@@ -2,8 +2,9 @@ import { useMemo } from "react";
 import CardFace, { RARITY_LABEL } from "./CardFace.jsx";
 import useTilt from "./useTilt.js";
 
-const EMBERS = 6;
+const EMBERS = 10;
 
+/** Sparks rising up a legendary card, behind its art and text (transform/opacity only). */
 function Embers() {
     const embers = useMemo(
         () =>
@@ -25,43 +26,43 @@ function Embers() {
     );
 }
 
-/** A card in the grid. Tilts under the pointer and opens the inspector on click. */
+/**
+ * A trading card that tilts under the pointer (ported from the prototype).
+ * Click or Enter/Space opens it in the inspector, which turns it over.
+ */
 function ProjectCard({ project, hidden, onInspect }) {
     const { ref, onPointerMove, onPointerLeave } = useTilt(project.rarity === "legendary" ? 12 : 10);
 
+    // Measure the slot, not the card: the card may still be lifted and tilted by the hover.
     const open = () => {
         onPointerLeave();
-        onInspect(project, ref.current.getBoundingClientRect());
+        onInspect(project, ref.current.parentElement.getBoundingClientRect());
     };
 
     return (
-        <li className="deck__slot">
-            <div
-                ref={ref}
-                className="card"
-                data-rarity={project.rarity}
-                data-slug={project.slug}
-                style={hidden ? { visibility: "hidden" } : undefined}
-                role="button"
-                tabIndex={0}
-                aria-label={`${project.name}, ${RARITY_LABEL[project.rarity]}. Open details.`}
-                onPointerMove={onPointerMove}
-                onPointerLeave={onPointerLeave}
-                onClick={open}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        open();
-                    }
-                }}
-            >
-                <div className="card__shadow" aria-hidden="true" />
-                <div className="card__inner">
-                    <CardFace project={project} />
-                </div>
-                {project.rarity === "legendary" && <Embers />}
+        <div
+            ref={ref}
+            className="card"
+            data-rarity={project.rarity}
+            style={hidden ? { visibility: "hidden" } : undefined}
+            role="button"
+            tabIndex={0}
+            aria-label={`${project.name}, ${RARITY_LABEL[project.rarity]}. Open details.`}
+            onPointerMove={onPointerMove}
+            onPointerLeave={onPointerLeave}
+            onClick={open}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    open();
+                }
+            }}
+        >
+            <div className="card__shadow" aria-hidden="true" />
+            <div className="card__inner">
+                <CardFace project={project}>{project.rarity === "legendary" && <Embers />}</CardFace>
             </div>
-        </li>
+        </div>
     );
 }
 

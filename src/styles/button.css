@@ -1,0 +1,114 @@
+/* The site's button (components/Button.jsx): a dark plaque framed by a thin
+   double rule, with an ornate gothic bracket inside each corner. The bracket is the
+   Arcane Archive ornament (public/fx/corner-ornament.svg) used as a mask, so it
+   takes any colour. The plaque is dirtied like the prototype's stone cards: a
+   grime splatter (public/fx/Grime.webp, the prototype's Texture-Overlay) as a
+   dark mask, plus fine noise multiplied over it. Hover brightens the rules,
+   brackets, fill and label. */
+
+.btn {
+    --btn-ink: rgba(233, 230, 223, 0.62); /* brackets */
+    --btn-rule: rgba(233, 230, 223, 0.28); /* outer rule */
+    --btn-rule-inner: rgba(233, 230, 223, 0.12);
+    --btn-fill: rgba(38, 37, 34, 0.86);
+    --btn-grime: rgba(0, 0, 0, 0.32);
+    --corner: 1.35em;
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.1em;
+    padding: 0.2em 2.3em 0.1em;
+    border: 0;
+    background: none;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1;
+    color: rgba(233, 230, 223, 0.85);
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.95);
+    cursor: pointer;
+    transition: color 0.35s ease;
+}
+
+/* Plaque and double rule. The corners are covered by the brackets. */
+.btn::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: var(--btn-fill);
+    border: 1px solid var(--btn-rule);
+    box-shadow:
+        inset 0 0 0 3px var(--btn-fill),
+        inset 0 0 0 4px var(--btn-rule-inner);
+    transition:
+        background-color 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+/* Grime: dark splatter, heaviest towards the edges of the crop. */
+.btn__grime {
+    position: absolute;
+    z-index: -1;
+    inset: 1px;
+    background: var(--btn-grime);
+    -webkit-mask: url("/fx/Grime.webp") 32% 18% / 230% auto no-repeat;
+    mask: url("/fx/Grime.webp") 32% 18% / 230% auto no-repeat;
+    pointer-events: none;
+}
+
+/* Fine surface noise, multiplied (stays inside the button thanks to isolation). */
+.btn::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 1px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.55'/%3E%3C/svg%3E")
+        0 0 / 160px 160px;
+    mix-blend-mode: multiply;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.btn__corner {
+    position: absolute;
+    width: var(--corner);
+    aspect-ratio: 1;
+    background: var(--btn-ink);
+    -webkit-mask: url("/fx/corner-ornament.svg") center / contain no-repeat;
+    mask: url("/fx/corner-ornament.svg") center / contain no-repeat;
+    pointer-events: none;
+    transition: background-color 0.35s ease;
+}
+
+/* Tucked inside the frame, resting on the inner rule. The source ornament is a
+   bottom-left bracket; the others are mirrors of it. */
+.btn__corner--bl { left: 4px; bottom: 4px; }
+.btn__corner--br { right: 4px; bottom: 4px; transform: scaleX(-1); }
+.btn__corner--tl { left: 4px; top: 4px; transform: scaleY(-1); }
+.btn__corner--tr { right: 4px; top: 4px; transform: rotate(180deg); }
+
+.btn__label {
+    position: relative;
+    letter-spacing: 0.01em;
+}
+
+.btn:hover,
+.btn:focus-visible {
+    --btn-ink: rgba(240, 237, 230, 0.95);
+    --btn-rule: rgba(233, 230, 223, 0.55);
+    --btn-rule-inner: rgba(233, 230, 223, 0.22);
+    --btn-fill: rgba(54, 52, 48, 0.9);
+    color: var(--bone);
+}
+
+.btn:active {
+    translate: 0 1px;
+}
+
+.btn:focus-visible {
+    outline-offset: 6px;
+}

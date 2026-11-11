@@ -5,6 +5,8 @@ import CardBack from "./CardBack.jsx";
 
 const CARD_RATIO = 88 / 63; // standard trading card, height / width
 const FLIP = { type: "spring", stiffness: 80, damping: 17, mass: 1 };
+// The way back is a tween so the card lands exactly in its slot (a spring overshoots and settles late).
+const RETURN = { type: "tween", duration: 0.7, ease: [0.33, 1, 0.68, 1] };
 
 function getTargetSize() {
     const vw = window.innerWidth;
@@ -18,13 +20,17 @@ function getTargetSize() {
     return { width, height, left: (vw - width) / 2, top: (vh - height) / 2 };
 }
 
+const isBackdrop = (e) => e.target === e.currentTarget || e.target.classList.contains("inspector__veil");
+
 /**
- * Lifts a card out of the grid, brings it to the centre of the screen and turns it over.
- * Closing plays the same flight back into its slot.
+ * Lifts a card out of the deck, brings it to the centre of the screen and turns it over
+ * (ported from the prototype). Closing plays the same flight back into its slot.
+ * Only transform/opacity animate; the card is rendered at its final size and scaled down.
  */
 function CardInspector({ project, origin, onClose }) {
     const [target, setTarget] = useState(getTargetSize);
     const closeRef = useRef(null);
+    const pressedBackdrop = useRef(false);
 
     useEffect(() => {
         const onResize = () => setTarget(getTargetSize());
@@ -59,13 +65,25 @@ function CardInspector({ project, origin, onClose }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="inspector-title"
-            onClick={onClose}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.4, delay: 0.2 } }}
-            transition={{ duration: 0.35 }}
+            // Close only on a click that both starts and ends on the backdrop: a swipe in the
+            // gallery that ends outside the card also fires a click here.
+            onPointerDown={(e) => {
+                pressedBackdrop.current = isBackdrop(e);
+            }}
+            onClick={(e) => {
+                if (pressedBackdrop.current && isBackdrop(e)) onClose();
+            }}
         >
-            <div className="inspector__veil" aria-hidden="true" />
+            {/* Only the veil fades. The card stays opaque all the way back to its slot,
+                where the grid card takes over once the flight has finished. */}
+            <motion.div
+                className="inspector__veil"
+                aria-hidden="true"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.5, delay: 0.1 } }}
+                transition={{ duration: 0.35 }}
+            />
 
             <motion.div
                 className="inspector__card"
@@ -78,7 +96,7 @@ function CardInspector({ project, origin, onClose }) {
                 }}
                 initial={fromSlot}
                 animate={{ x: 0, y: 0, scale: 1, rotateY: 180 }}
-                exit={{ ...fromSlot, transition: { ...FLIP, stiffness: 95 } }}
+                exit={{ ...fromSlot, transition: RETURN }}
                 transition={FLIP}
                 onClick={(e) => e.stopPropagation()}
             >

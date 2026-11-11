@@ -1,4 +1,5 @@
 import Gem from "./Gem.jsx";
+import TechIcon from "./TechIcon.jsx";
 
 export const RARITY_LABEL = {
     legendary: "Legendary",
@@ -7,7 +8,8 @@ export const RARITY_LABEL = {
     common: "Common",
 };
 
-const MAX_FRONT_TECH = 4;
+// Tiles that fit across the front; with more tech the last tile becomes "+N".
+const MAX_FRONT_TILES = 6;
 
 export function Ornaments() {
     return (
@@ -21,46 +23,50 @@ export function Ornaments() {
 }
 
 /**
- * The front of a project card. Sizes are in container units, so the same face
- * renders in the grid and blown up in the inspector.
+ * The front of a project card (ported from the prototype). Sizes are in container
+ * units (cqw), so the same face renders at any card size.
+ * `project`: { name, rarity, tagline, tech[], cover } (cover: the 640px card art thumbnail).
+ * `children` are painted on the stone, behind the art and text (e.g. legendary embers).
  */
-function CardFace({ project }) {
-    const { name, rarity, tagline, tech, images } = project;
-    const extraTech = tech.length - MAX_FRONT_TECH;
+function CardFace({ project, children }) {
+    const { name, rarity, tagline, tech, cover } = project;
+    const shown = tech.length > MAX_FRONT_TILES ? MAX_FRONT_TILES - 1 : tech.length;
+    const extraTech = tech.length - shown;
 
     return (
         <div className="face" data-rarity={rarity}>
             <div className="face__surface" aria-hidden="true" />
+            {rarity === "epic" && <div className="face__arcane" aria-hidden="true" />}
+            {children}
             <Ornaments />
             <Gem className="face__gem" />
 
             <h3 className="face__name">{name}</h3>
 
             <figure className="face__art">
-                {/* 640px thumbnails (public/projects/thumbs); the full-size images load on the back. */}
-                <img
-                    src={`/${images[0].replace("projects/", "projects/thumbs/")}`}
-                    alt={`Preview of ${name}`}
-                    loading="lazy"
-                    decoding="async"
-                />
-
+                <img src={cover} alt={`Preview of ${name}`} loading="lazy" decoding="async" />
             </figure>
 
             <p className="face__tagline">{tagline}</p>
 
             <ul className="face__tech" aria-label="Built with">
-                {tech.slice(0, MAX_FRONT_TECH).map((t) => (
-                    <li key={t}>{t}</li>
+                {tech.slice(0, shown).map((t) => (
+                    <li key={t} title={t}>
+                        <TechIcon name={t} />
+                        <span className="sr-only">{t}</span>
+                    </li>
                 ))}
-                {extraTech > 0 && <li className="face__tech-more">+{extraTech}</li>}
+                {extraTech > 0 && (
+                    <li className="face__tech-more" title={tech.slice(shown).join(", ")}>
+                        +{extraTech}
+                    </li>
+                )}
             </ul>
 
             <p className="face__rarity">{RARITY_LABEL[rarity]}</p>
 
             <div className="face__fx" aria-hidden="true">
                 <div className="face__foil" />
-                <div className="face__glare" />
             </div>
         </div>
     );
