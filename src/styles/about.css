@@ -1,0 +1,160 @@
+/* ==========================================================================
+   About (placeholder): the V1 text on one stone slab, like the Archive's player.
+   ========================================================================== */
+
+.about {
+    padding-bottom: 12vh;
+}
+
+.slab {
+    position: relative;
+    max-width: 980px;
+    container-type: inline-size;
+    isolation: isolate;
+}
+
+/* Offset backing, as on the cards. */
+.slab::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #2d2b28;
+    clip-path: var(--rough-edge);
+    transform: translate(5px, 6px);
+}
+
+.slab__face {
+    --ink: #0d0c0b;
+    --ornament: #0d0c0b;
+
+    position: relative;
+    padding: clamp(36px, 7cqw, 72px) clamp(24px, 7cqw, 76px);
+    color: var(--ink);
+    background: #9d9a94;
+    clip-path: var(--rough-edge);
+}
+
+.slab__surface,
+.slab__surface::before,
+.slab__surface::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.slab__surface::before {
+    content: "";
+    background: #000;
+    opacity: 0.16;
+    -webkit-mask: url("/fx/Texture-Overlay.png") 30% 20% / 160% auto;
+    mask: url("/fx/Texture-Overlay.png") 30% 20% / 160% auto;
+}
+
+.slab__surface::after {
+    content: "";
+    background-image:
+        linear-gradient(168deg, rgba(255, 255, 255, 0.08) 0%, transparent 38%, rgba(0, 0, 0, 0.05) 72%, transparent 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: auto, 160px 160px;
+    mix-blend-mode: multiply;
+    opacity: 0.85;
+}
+
+.slab .ornament {
+    width: clamp(64px, 14cqw, 140px);
+}
+
+.about__body {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+    gap: clamp(24px, 5cqw, 56px);
+    align-items: start;
+}
+
+.about__portrait {
+    margin: 0;
+    border: 6px solid var(--ink);
+    outline: 2px solid rgba(13, 12, 11, 0.35);
+    outline-offset: 5px;
+    background: #111;
+}
+
+.about__portrait img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.15) brightness(0.95);
+}
+
+.about__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5cqw, 3rem);
+    font-weight: normal;
+    line-height: 1;
+}
+
+.about__roles {
+    margin: 0.7rem 0 1.4rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: rgba(13, 12, 11, 0.8);
+}
+
+.about__text p {
+    margin: 0 0 1rem;
+    line-height: 1.6;
+}
+
+.about__text h3 {
+    margin: 1.6rem 0 0.4rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.about__text a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(13, 12, 11, 0.4);
+    text-underline-offset: 3px;
+}
+
+.about__text a:hover {
+    text-decoration-color: var(--ink);
+}
+
+.about__links {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.8rem !important;
+}
+
+.about__links a {
+    padding: 0.4rem 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    transition:
+        background 0.2s,
+        color 0.2s;
+}
+
+.about__links a:hover {
+    background: var(--ink);
+    color: #9d9a94;
+}
+
+@container (max-width: 640px) {
+    .about__body {
+        grid-template-columns: 1fr;
+    }
+    .about__portrait {
+        max-width: 220px;
+    }
+}
